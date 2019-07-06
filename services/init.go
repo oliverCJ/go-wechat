@@ -161,10 +161,12 @@ func (init *InitService) loginInit() error {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
 			} else if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
-			} else if item.VerifyFlag&8 != 0 {
+			} else if item.ContactFlag == 3 {
 				temp.Type = types.CONTACT_TYPE_PUBLIC
 			} else if item.UserName[:1] == "@" {
 				temp.Type = types.CONTACT_TYPE_MEMBER
+			} else {
+				temp.Type = types.CONTACT_TYPE_UNKONWN
 			}
 
 			init.BaseUserData.GlobalMemberMap[item.UserName] = temp
