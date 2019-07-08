@@ -62,7 +62,7 @@ func GetContact() services.ContactList {
 }
 
 // 获取聊天列表
-func GetChatList() []services.User {
+func GetChatList() []services.Member {
 	return gw.userData.ChatList
 }
 

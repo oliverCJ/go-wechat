@@ -115,7 +115,7 @@ func (init *InitService) loginInit() error {
 		BaseResponse        *BaseResponse    `json:"BaseResponse"`
 		User                User             `json:"User"`
 		Count               int              `json:"Count"`
-		ContactList         []User           `json:"ContactList"`
+		ContactList         []Member         `json:"ContactList"`
 		SyncKey             SyncKey          `json:"SyncKey"`
 		ChatSet             string           `json:"ChatSet"`
 		SKey                string           `json:"SKey"`
@@ -318,10 +318,10 @@ func (init *InitService) getContact() error {
 
 	// 映射chatset
 	if len(init.BaseUserData.ChatSet) > 0 {
-		init.BaseUserData.ChatList = []User{}
+		init.BaseUserData.ChatList = []Member{}
 		for _, v := range init.BaseUserData.ChatSet {
 			if value, ok := init.BaseUserData.GlobalMemberMap[v]; ok {
-				init.BaseUserData.ChatList = append(init.BaseUserData.ChatList, User{
+				init.BaseUserData.ChatList = append(init.BaseUserData.ChatList, Member{
 					UserName:    value.UserName,
 					NickName:    value.NickName,
 					DisplayName: value.DisplayName,

@@ -24,7 +24,7 @@ type BaseUserData struct {
 	// 联系人列表
 	ContactList ContactList
 	// 当前聊天列表（可能包含非联系人，比如临时聊天群）
-	ChatList []User
+	ChatList []Member
 	// chatset
 	ChatSet    []string
 
