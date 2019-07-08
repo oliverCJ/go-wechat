@@ -1,6 +1,8 @@
 package go_wechat
 
 import (
+	"os"
+
 	"github.com/oliverCJ/go-wechat/global"
 	"github.com/oliverCJ/go-wechat/services"
 	"github.com/sirupsen/logrus"
@@ -23,8 +25,8 @@ func SetCacheHistory(set bool) {
 }
 
 // 设置日志级别
-func SetLog(logLevel, logPath string) {
-	gw.SetLog(logLevel, logPath)
+func SetLog(logLevel string, logOutChan chan string, logFile *os.File) {
+	gw.SetLog(logLevel, logOutChan, logFile)
 }
 
 // 设置日志存储根目录

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,10 +20,33 @@ func startDaemon() {
 	go_wechat.GetWeChat()
 	go_wechat.SetHoReload(true)
 	go_wechat.SetRootPath(dir)
+
+	logOut := make(chan string)
+	logFile, _ := os.OpenFile(os.DevNull, os.O_RDWR, 0644)
+	defer logFile.Close()
+	go_wechat.SetLog("debug", logOut, logFile)
+
+	closeChan := go_wechat.GetCloseChan()
 	stopCh := make(chan os.Signal, 1)
 	signal.Notify(stopCh, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		for {
+			select {
+			case log := <- logOut:
+				fmt.Println("hook:" + log)
+			case <-closeChan:
+				logrus.Infof("意外中断")
+				return
+			case <-stopCh:
+				logrus.Infof("停止接收日志")
+				return
+			}
+		}
+	}()
+
 	if err := go_wechat.Start(); err == nil {
-		closeChan := go_wechat.GetCloseChan()
+
 		for {
 			select {
 			case <-stopCh:

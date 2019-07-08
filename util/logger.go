@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"syscall"
 
 	"github.com/sirupsen/logrus"
 )
@@ -16,7 +15,8 @@ type Log struct {
 	Level        string
 	Format       string
 	init         bool
-	LogPath      string
+	LogOutChan   chan string
+	LogFile      *os.File
 }
 
 func (log *Log) SetDefaults() {
@@ -56,10 +56,10 @@ func (log *Log) Create() {
 
 	logrus.SetLevel(getLogLevel(log.Level))
 	logrus.SetReportCaller(log.ReportCaller)
-	logrus.AddHook(NewWeChatLLoggerHook(log.Name))
+	logrus.AddHook(NewWeChatLoggerHook(log.Name, log.LogOutChan))
 
-	if log.LogPath != "" {
-		logrus.SetOutput(os.NewFile(uintptr(syscall.Stdout), log.LogPath))
+	if log.LogFile != nil {
+		logrus.SetOutput(log.LogFile)
 	} else {
 		logrus.SetOutput(os.Stdout)
 	}
@@ -67,17 +67,27 @@ func (log *Log) Create() {
 }
 
 type WeChatLoggerHook struct {
-	Name string
+	Name    string
+	OutChan chan string
 }
 
-func NewWeChatLLoggerHook(name string) *WeChatLoggerHook {
+func NewWeChatLoggerHook(name string, outChan chan string) *WeChatLoggerHook {
 	return &WeChatLoggerHook{
-		Name: name,
+		Name:    name,
+		OutChan: outChan,
 	}
 }
 
 func (hook *WeChatLoggerHook) Fire(entry *logrus.Entry) error {
 	entry.Data["name"] = hook.Name
+	content, err := entry.String()
+	if err != nil {
+		return err
+	}
+	if hook.OutChan != nil {
+		hook.OutChan <- content
+	}
+
 	return nil
 }
 

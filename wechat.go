@@ -1,6 +1,8 @@
 package go_wechat
 
 import (
+	"os"
+
 	"github.com/oliverCJ/go-wechat/services"
 	"github.com/oliverCJ/go-wechat/util"
 )
@@ -48,10 +50,11 @@ func (w *weChat) Init() {
 	w.closeChan = make(chan bool, 0)
 }
 
-func (w *weChat) SetLog(logLevel, logPath string) {
+func (w *weChat) SetLog(logLevel string, logOutChan chan string, logFile *os.File) {
 	w.log = new(util.Log)
-	w.log.LogPath = logPath
+	w.log.LogOutChan = logOutChan
 	w.log.Level = logLevel
+	w.log.LogFile = logFile
 }
 
 func (w *weChat) SetHoReload(set bool) {
