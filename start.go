@@ -56,6 +56,11 @@ func GetCloseChan() <-chan bool {
 	return gw.closeChan
 }
 
+// 获取可操作的关闭通道操作符
+func GetCloseOpChan() chan<- bool {
+	return gw.closeChan
+}
+
 // 获取联系人列表
 func GetContact() services.ContactList {
 	return gw.userData.ContactList
