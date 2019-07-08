@@ -1,6 +1,7 @@
 package go_wechat
 
 import (
+	"github.com/oliverCJ/go-wechat/global"
 	"github.com/oliverCJ/go-wechat/services"
 	"github.com/sirupsen/logrus"
 )
@@ -29,6 +30,10 @@ func SetLog(logLevel, logPath string) {
 // 设置日志存储根目录
 func SetRootPath(dir string) {
 	gw.rootPath = dir
+}
+
+func SetCryptConf(conf *global.CryptConf) {
+	global.Common.CryptConf = conf
 }
 
 // 获取读取消息通道操作符

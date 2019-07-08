@@ -39,6 +39,12 @@ type WXUrlBase struct {
 	WebWXSendVideoMsgUrl string
 }
 
+type CryptConf struct {
+	LeftCryptCode string
+	RightCryptCode string
+	Password uint8
+}
+
 var (
 	HostLogin = "https://login.weixin.qq.com"
 	HostWx    = "https://wx2.qq.com"
@@ -62,6 +68,8 @@ var Common = struct {
 	SpecialUsers map[string]string
 
 	UserAgent string
+
+	CryptConf *CryptConf
 }{
 
 	WXUrlBase: WXUrlBase{
@@ -124,4 +132,10 @@ var Common = struct {
 	},
 
 	UserAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.71 Safari/537.36",
+
+	CryptConf: &CryptConf{
+		LeftCryptCode: "9ni=Y*]2`L7T{zxq#)V-v;u:wkoW.ZaJIpD_y|Mr?sC[8RH$Q><}E(j1g^hF3NSA",
+		RightCryptCode: "5Q-1#)8>aIzPRhBy:(kFM@7cboX~6v]$j+Sd;L_r4qC*TsN=JAWftmZ{gD2<V'Gx",
+		Password: 123,
+	},
 }

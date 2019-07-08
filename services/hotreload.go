@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"os"
 
+	crypy "github.com/oliverCJ/crypt"
+	"github.com/oliverCJ/go-wechat/global"
+
 	"github.com/oliverCJ/go-wechat/constants/errors"
 	"github.com/oliverCJ/go-wechat/util"
 	"github.com/sirupsen/logrus"
@@ -84,7 +87,11 @@ func (h *HotReloadService) CacheLogin() error {
 			return nil
 		}
 
-		_, err = util.CacheData(loginDataByte, os.O_RDWR|os.O_CREATE|os.O_TRUNC, h.RootDir+"/auth.record")
+		crypt6 := crypy.NewCrypt6(global.Common.CryptConf.LeftCryptCode, global.Common.CryptConf.RightCryptCode, global.Common.CryptConf.Password)
+		buf := make([]byte, crypt6.EnCryptLen(len(loginDataByte)))
+		crypt6.EnCrypt(buf, loginDataByte)
+
+		_, err = util.CacheData(buf, os.O_RDWR|os.O_CREATE|os.O_TRUNC, h.RootDir+"/auth.record")
 		if err != nil {
 			logrus.Warningf("存储用户信息失败[err:%s]", err.Error())
 			return nil
@@ -101,14 +108,23 @@ func LoadLogin(rootDir string, autoReply bool, msgRead chan Message, msgSend cha
 		return nil, nil, false, nil
 	}
 
+	crypt6 := crypy.NewCrypt6(global.Common.CryptConf.LeftCryptCode, global.Common.CryptConf.RightCryptCode, global.Common.CryptConf.Password)
+	dbuf := make([]byte, crypt6.DeCryptLen(len(resp)))
+	n, err := crypt6.DeCrypt(dbuf, resp)
+	if err != nil {
+		logrus.Warningf("解密数据失败")
+		return nil, nil, false, nil
+	}
+
 	oldCacheData := new(cacheStruct)
 
-	err = json.Unmarshal(resp, oldCacheData)
+	err = json.Unmarshal(dbuf[:n], oldCacheData)
 	if err != nil {
 		logrus.Warningf("解析已保存的登录数据失败[err:%s]", err.Error())
 		// 不中断。重新登录
 		return nil, nil, false, nil
 	}
+
 
 	loginData := new(BaseLoginData)
 	loginData.UUID = oldCacheData.LoginData.UUID
