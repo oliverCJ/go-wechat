@@ -161,7 +161,7 @@ func (init *InitService) loginInit() error {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
 			} else if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
-			} else if item.ContactFlag == 3 {
+			} else if item.VerifyFlag&8 != 0 { // 公总号
 				temp.Type = types.CONTACT_TYPE_PUBLIC
 			} else if item.UserName[:1] == "@" {
 				temp.Type = types.CONTACT_TYPE_MEMBER
@@ -295,13 +295,13 @@ func (init *InitService) getContact() error {
 				City:        item.City,
 			}
 
-			if item.ContactFlag == 2 { // 群组
+			if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
 				init.BaseUserData.ContactList.Group = append(init.BaseUserData.ContactList.Group, item)
-			} else if item.ContactFlag == 3 { // 公众号
+			} else if item.VerifyFlag&8 != 0 { // 公众号
 				temp.Type = types.CONTACT_TYPE_PUBLIC
 				init.BaseUserData.ContactList.PublicUser = append(init.BaseUserData.ContactList.PublicUser, item)
-			} else if item.ContactFlag == 1 { // 联系人
+			} else if item.UserName[:1] == "@" { // 联系人
 				temp.Type = types.CONTACT_TYPE_MEMBER
 				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
 			} else if _, ok := global.Common.SpecialUsers[item.UserName]; ok {
