@@ -15,7 +15,7 @@ type BaseLoginData struct {
 	LoginRedirectUrl string
 	// 公参数据解析
 	BaseRequest *BaseRequest
-	Cookie []*http.Cookie
+	Cookie      []*http.Cookie
 }
 
 type BaseUserData struct {
@@ -26,11 +26,11 @@ type BaseUserData struct {
 	// 当前聊天列表（可能包含非联系人，比如临时聊天群）
 	ChatList []Member
 	// chatset
-	ChatSet    []string
+	ChatSet []string
 
-	SyncKey    SyncKey
-	SyncKeyStr string
-	SyncCheckKey SyncKey
+	SyncKey         SyncKey
+	SyncKeyStr      string
+	SyncCheckKey    SyncKey
 	SyncCheckKeyStr string
 	// 订阅信息
 	MPSubscribeMsgList []MPSubscribeMsg
@@ -50,6 +50,8 @@ type TinyMemberInfo struct {
 	Province    string
 	City        string
 	Type        types.ContactType
+	MemberList  []User
+	MemberCount int
 }
 
 // 公参
@@ -189,7 +191,6 @@ type SyncMsgResp struct {
 	SyncCheckKey   SyncKey       `json:"SyncCheckKey"`
 }
 
-
 type Message struct {
 	MsgId int64
 	// 消息发送者
@@ -201,9 +202,9 @@ type Message struct {
 	PlayLength    int
 	RecommendInfo []string
 	// 消息内容
-	Content              string
+	Content string
 	// 格式化后的消息
-	FormatContent		 string
+	FormatContent        string
 	StatusNotifyUserName string
 	StatusNotifyCode     int
 	Status               int
@@ -219,10 +220,10 @@ type Message struct {
 	FileName             string
 	FileSize             string
 	// 消息发送者名称
-	FromUserNickName     string
-	ToUserNickName       string
+	FromUserNickName string
+	ToUserNickName   string
 	// 消息发送的群名
-	FromGroupNickName    string
+	FromGroupNickName string
 	// 消息创建时间
 	CreateTime int32
 }
@@ -242,6 +243,6 @@ type SendMessage struct {
 
 type SendMessageResp struct {
 	BaseRequest BaseRequest
-	MsgID string
-	LocalID string
+	MsgID       string
+	LocalID     string
 }

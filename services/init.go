@@ -156,6 +156,8 @@ func (init *InitService) loginInit() error {
 				VerifyFlag:  item.VerifyFlag,
 				Province:    item.Province,
 				City:        item.City,
+				MemberList:  item.MemberList,
+				MemberCount: item.MemberCount,
 			}
 			if _, ok := global.Common.SpecialUsers[item.UserName]; ok {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
@@ -291,6 +293,8 @@ func (init *InitService) getContact() error {
 				VerifyFlag:  item.VerifyFlag,
 				Province:    item.Province,
 				City:        item.City,
+				MemberList:  item.MemberList,
+				MemberCount: item.MemberCount,
 			}
 
 			if item.UserName[:2] == "@@" { // 群组
@@ -343,7 +347,65 @@ func (init *InitService) getContact() error {
 	return nil
 }
 
-// TODO 批量获取联系人详情
-func (init *InitService) BatchGetContactInfo() {
+// 批量获取联系人详情
+func (init *InitService) BatchGetContactInfo(ids []string) error {
+	if len(ids) == 0 || len(ids) > 50 {
+		return nil
+	}
+	params := url.Values{}
+	params.Set("type", "ex")
+	params.Set("lang", global.Common.Lang)
+	params.Set("pass_ticket", init.LoginData.BaseRequest.PassTicket)
+	params.Set("r", strconv.FormatInt(time.Now().Unix(), 10))
+	bodyParam := make(map[string]interface{})
+	bodyParam["BaseRequest"] = *init.LoginData.BaseRequest
+	bodyParam["count"] = len(ids)
+	list := []map[string]string{}
+	for _, v := range ids {
+		list = append(list, map[string]string{
+			"UserName":   v,
+			"ChatRoomId": "",
+		})
+	}
+	bodyParam["List"] = list
+	bodyParamByte, _ := json.Marshal(bodyParam)
 
+	urlPath := fmt.Sprintf("%s?%s", global.Common.WXUrlBase.LoginContactBatchUrl, params.Encode())
+	resp, err := init.Request.Request(http.MethodPost, urlPath, bodyParamByte, util.JSON_HEADER)
+	if err != nil {
+		logrus.Warningf("批量获取联系人失败[err:%s]", err.Error())
+		return errors.InitLoginError.New().WithMsg("批量获取联系人失败").WithDesc(err.Error())
+	}
+
+	type contactBatch struct {
+		BaseResponse *BaseRequest
+		Count        int
+		ContactList  []Member
+	}
+
+	respData := new(contactBatch)
+	err = json.Unmarshal(resp, respData)
+	if err != nil {
+		logrus.Warningf("批量获取联系人解析失败[err:%s]", err.Error())
+		return errors.InitLoginError.New().WithMsg("批量获取联系人解析失败").WithDesc(err.Error())
+	}
+
+	if respData.BaseResponse.Ret != 0 {
+		logrus.Warningf("批量获取联系人返回错误")
+		return errors.InitLoginError.New().WithMsg("批量获取联系人返回错误")
+	}
+
+	for _, v := range respData.ContactList {
+		if value, ok := init.BaseUserData.GlobalMemberMap[v.UserName]; ok {
+			temp := init.BaseUserData.GlobalMemberMap[v.UserName]
+			if v.UserName[:2] == "@@" {
+				temp.MemberList = value.MemberList
+			}
+			temp.DisplayName = value.DisplayName
+			temp.NickName = value.NickName
+			temp.MemberCount = value.MemberCount
+			init.BaseUserData.GlobalMemberMap[v.UserName] = temp
+		}
+	}
+	return nil
 }
