@@ -428,6 +428,7 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 			}
 			temp.DisplayName = value.DisplayName
 			temp.NickName = value.NickName
+			temp.MemberCount = value.MemberCount
 			init.BaseUserData.GlobalMemberMap[v.UserName] = temp
 		}
 	}

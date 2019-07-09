@@ -217,7 +217,7 @@ func (msg *MsgServices) ParseMsg() error {
 					groupMemberMatches := regexp.MustCompile(`@(\S+):`)
 					matchResult := groupMemberMatches.FindStringSubmatch(message.Content)
 					if len(matchResult) == 2 {
-						message.RealUserName = matchResult[1]
+						message.RealUserName = "@" + matchResult[1]
 						user, _ := msg.InitService.SearchMemberInfo(message.RealUserName, message.FromUserName)
 						if user != nil {
 							message.RealUserNickName = user.NickName
