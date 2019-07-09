@@ -192,12 +192,14 @@ func (msg *MsgServices) ParseMsg() error {
 			message.MsgType = int(msgType)
 			message.FromUserName = v.(map[string]interface{})["FromUserName"].(string)
 			message.ToUserName = v.(map[string]interface{})["ToUserName"].(string)
+			message.RealUserName = message.FromUserName
 			if nickName, ok := msg.UserData.GlobalMemberMap[message.FromUserName]; ok {
 				message.FromUserNickName = nickName.NickName
 			}
 			if nickName, ok := msg.UserData.GlobalMemberMap[message.ToUserName]; ok {
 				message.ToUserNickName = nickName.NickName
 			}
+			message.RealUserNickName = message.FromUserNickName
 
 			message.Content = v.(map[string]interface{})["Content"].(string)
 			message.FormatContent = strings.Replace(message.Content, "&lt;", "<", -1)
@@ -212,6 +214,16 @@ func (msg *MsgServices) ParseMsg() error {
 			case 1: // 文本消息
 				// 群组消息
 				if message.FromUserName[:2] == "@@" {
+					groupMemberMatches := regexp.MustCompile(`@(\S+):`)
+					matchResult := groupMemberMatches.FindStringSubmatch(message.Content)
+					if len(matchResult) == 2 {
+						message.RealUserName = matchResult[1]
+						user, _ := msg.InitService.SearchMemberInfo(message.RealUserName, message.FromUserName)
+						if user != nil {
+							message.RealUserNickName = user.NickName
+						}
+					}
+
 					contentSlice := strings.Split(message.FormatContent, ":<br/>")
 					message.FormatContent = contentSlice[1]
 					// 取群名

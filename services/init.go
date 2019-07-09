@@ -430,3 +430,21 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 	}
 	return nil
 }
+
+
+func (init *InitService) SearchMemberInfo(userName, groupName string) (*User, *TinyMemberInfo) {
+	if groupName != "" {
+		if group, ok := init.BaseUserData.GlobalMemberMap[groupName]; ok {
+			if len(group.GroupMemberMap) > 0 {
+				if user, ok2 := group.GroupMemberMap[userName]; ok2 {
+					return &user, &group
+				}
+			}
+		}
+	} else {
+		if user, ok := init.BaseUserData.GlobalMemberMap[userName]; ok {
+			return nil, &user
+		}
+	}
+	return nil, nil
+}

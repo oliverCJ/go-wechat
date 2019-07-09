@@ -197,6 +197,8 @@ type Message struct {
 	FromUserName string
 	// 消息接收者
 	ToUserName string
+	// 消息真实发送者
+	RealUserName string
 	// 消息类型
 	MsgType       int
 	PlayLength    int
@@ -222,6 +224,8 @@ type Message struct {
 	// 消息发送者名称
 	FromUserNickName string
 	ToUserNickName   string
+	// 消息真实发送者
+	RealUserNickName string
 	// 消息发送的群名
 	FromGroupNickName string
 	// 消息创建时间
