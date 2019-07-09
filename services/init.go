@@ -415,7 +415,7 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 	}
 
 	for _, v := range respData.ContactList {
-		if value, ok := init.BaseUserData.GlobalMemberMap[v.UserName]; ok {
+		if _, ok := init.BaseUserData.GlobalMemberMap[v.UserName]; ok {
 			temp := init.BaseUserData.GlobalMemberMap[v.UserName]
 			if v.UserName[:2] == "@@" {
 				if len(v.MemberList) > 0 {
@@ -426,9 +426,9 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 					temp.GroupMemberMap = groupMemberMap
 				}
 			}
-			temp.DisplayName = value.DisplayName
-			temp.NickName = value.NickName
-			temp.MemberCount = value.MemberCount
+			temp.DisplayName = v.DisplayName
+			temp.NickName = v.NickName
+			temp.MemberCount = v.MemberCount
 			init.BaseUserData.GlobalMemberMap[v.UserName] = temp
 		}
 	}
