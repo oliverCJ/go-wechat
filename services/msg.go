@@ -365,7 +365,7 @@ func (msg *MsgServices) SyncDaemon(close chan<- bool) {
 		case 4: // 通讯录更新
 			logrus.Infof("通讯录发生变更")
 			// 更新通讯录
-			_ = msg.InitService.getContact()
+			_ = msg.InitService.GetContact()
 			// TODO
 		case 6: //
 		case 7: // 进入或离开聊天界面

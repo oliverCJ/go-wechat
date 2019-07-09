@@ -52,7 +52,7 @@ func (init *InitService) Init() error {
 	if err != nil {
 		return err
 	}
-	err = init.getContact()
+	err = init.GetContact()
 	if err != nil {
 		return err
 	}
@@ -254,7 +254,7 @@ func (init *InitService) statusNotify() error {
 }
 
 // 获取联系人
-func (init *InitService) getContact() error {
+func (init *InitService) GetContact() error {
 	params := url.Values{}
 	params.Set("pass_ticket", init.LoginData.BaseRequest.PassTicket)
 	params.Set("skey", init.LoginData.BaseRequest.Skey)
@@ -376,12 +376,12 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 	params.Set("r", strconv.FormatInt(time.Now().Unix(), 10))
 	bodyParam := make(map[string]interface{})
 	bodyParam["BaseRequest"] = *init.LoginData.BaseRequest
-	bodyParam["count"] = len(ids)
+	bodyParam["Count"] = len(ids)
 	list := []map[string]string{}
 	for _, v := range ids {
 		list = append(list, map[string]string{
 			"UserName":   v,
-			"ChatRoomId": "",
+			"EncryChatRoomId": "",
 		})
 	}
 	bodyParam["List"] = list
@@ -395,7 +395,7 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 	}
 
 	type contactBatch struct {
-		BaseResponse *BaseRequest
+		BaseResponse BaseRequest
 		Count        int
 		ContactList  []Member
 	}
@@ -406,6 +406,8 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 		logrus.Warningf("批量获取联系人解析失败[err:%s]", err.Error())
 		return errors.InitLoginError.New().WithMsg("批量获取联系人解析失败").WithDesc(err.Error())
 	}
+
+	logrus.Debugf("批量查询信息[ids:%+v, resp:%+v]", ids, respData)
 
 	if respData.BaseResponse.Ret != 0 {
 		logrus.Warningf("批量获取联系人返回错误")
@@ -426,7 +428,6 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 			}
 			temp.DisplayName = value.DisplayName
 			temp.NickName = value.NickName
-			temp.MemberCount = value.MemberCount
 			init.BaseUserData.GlobalMemberMap[v.UserName] = temp
 		}
 	}

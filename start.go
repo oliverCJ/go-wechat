@@ -127,6 +127,7 @@ func Start() error {
 		if err == nil && ok {
 			contactService := services.NewInitService(loginData)
 			contactService.BaseUserData = userData
+			contactService.GetContact()
 			msgService, err := MsgInit(contactService)
 			if err != nil {
 				return err
