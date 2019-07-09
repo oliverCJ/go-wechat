@@ -179,6 +179,10 @@ func (init *InitService) loginInit() error {
 
 			init.BaseUserData.GlobalMemberMap[item.UserName] = temp
 			init.BaseUserData.ChatList = append(init.BaseUserData.ChatList, item)
+			if temp.Type == types.CONTACT_TYPE_GROUP {
+				// 通讯录的群组需要单独查询组员信息
+				init.BatchGetContactInfo([]string{item.UserName})
+			}
 		}
 	}
 	for _, v := range global.Common.SpecialUsers {
@@ -303,6 +307,7 @@ func (init *InitService) GetContact() error {
 				Province:    item.Province,
 				City:        item.City,
 				MemberCount: item.MemberCount,
+
 			}
 			if len(item.MemberList) > 0 {
 				groupMemberMap := make(map[string]User)
@@ -315,8 +320,6 @@ func (init *InitService) GetContact() error {
 			if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
 				init.BaseUserData.ContactList.Group = append(init.BaseUserData.ContactList.Group, item)
-				// 通讯录的群组需要单独查询组员信息
-				init.BatchGetContactInfo([]string{item.UserName})
 			} else if item.UserName[:1] == "@" { // 联系人
 				temp.Type = types.CONTACT_TYPE_MEMBER
 				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
@@ -329,6 +332,10 @@ func (init *InitService) GetContact() error {
 			}
 
 			init.BaseUserData.GlobalMemberMap[item.UserName] = temp
+			if temp.Type == types.CONTACT_TYPE_GROUP {
+				// 通讯录的群组需要单独查询组员信息
+				init.BatchGetContactInfo([]string{item.UserName})
+			}
 		}
 	}
 
@@ -406,8 +413,6 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 		logrus.Warningf("批量获取联系人解析失败[err:%s]", err.Error())
 		return errors.InitLoginError.New().WithMsg("批量获取联系人解析失败").WithDesc(err.Error())
 	}
-
-	logrus.Debugf("批量查询信息[ids:%+v, resp:%+v]", ids, respData)
 
 	if respData.BaseResponse.Ret != 0 {
 		logrus.Warningf("批量获取联系人返回错误")

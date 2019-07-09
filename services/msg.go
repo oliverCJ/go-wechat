@@ -210,26 +210,28 @@ func (msg *MsgServices) ParseMsg() error {
 				message.FromUserNickName = msg.UserData.UserInfo.NickName
 			}
 
+			// 群组消息发送者需要单独获取
+			if message.FromUserName[:2] == "@@" {
+				groupMemberMatches := regexp.MustCompile(`@(\S+):`)
+				matchResult := groupMemberMatches.FindStringSubmatch(message.Content)
+				if len(matchResult) == 2 {
+					message.RealUserName = "@" + matchResult[1]
+					user, _ := msg.InitService.SearchMemberInfo(message.RealUserName, message.FromUserName)
+					if user != nil {
+						message.RealUserNickName = user.NickName
+					}
+					if group, ok := msg.UserData.GlobalMemberMap[message.FromUserName]; ok {
+						message.FromGroupNickName = group.DisplayName
+					}
+				}
+			}
+
 			switch message.MsgType {
 			case 1: // 文本消息
 				// 群组消息
 				if message.FromUserName[:2] == "@@" {
-					groupMemberMatches := regexp.MustCompile(`@(\S+):`)
-					matchResult := groupMemberMatches.FindStringSubmatch(message.Content)
-					if len(matchResult) == 2 {
-						message.RealUserName = "@" + matchResult[1]
-						user, _ := msg.InitService.SearchMemberInfo(message.RealUserName, message.FromUserName)
-						if user != nil {
-							message.RealUserNickName = user.NickName
-						}
-					}
-
 					contentSlice := strings.Split(message.FormatContent, ":<br/>")
 					message.FormatContent = contentSlice[1]
-					// 取群名
-					if group, ok := msg.UserData.GlobalMemberMap[message.FromUserName]; ok {
-						message.FromGroupNickName = group.DisplayName
-					}
 				} else {
 					if msg.autoReply {
 						//TODO
@@ -363,11 +365,23 @@ func (msg *MsgServices) SyncDaemon(close chan<- bool) {
 				logrus.Warningf("处理消息发生错误[err:%s]", err.Error())
 			}
 		case 4: // 通讯录更新
+			err := msg.SyncMsg()
+			if err != nil {
+				logrus.Warningf("拉取消息发生错误[err:%s]", err.Error())
+				close <- true
+				return
+			}
 			logrus.Infof("通讯录发生变更")
 			// 更新通讯录
 			_ = msg.InitService.GetContact()
 			// TODO
-		case 6: //
+		case 6: // ？
+			err := msg.SyncMsg()
+			if err != nil {
+				logrus.Warningf("拉取消息发生错误[err:%s]", err.Error())
+				close <- true
+				return
+			}
 		case 7: // 进入或离开聊天界面
 		case 0: // 无事件
 		}

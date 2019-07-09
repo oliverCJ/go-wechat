@@ -57,7 +57,7 @@ func startDaemon() {
 				return
 			case msg := <-go_wechat.GetReadChan():
 				logrus.Infof("消息详情:%+v", msg)
-				logrus.Infof("%s 发送消息:%s", msg.FromUserNickName, msg.FormatContent)
+				logrus.Infof("%s 发送消息:%s", msg.RealUserNickName, msg.FormatContent)
 			}
 		}
 	}
