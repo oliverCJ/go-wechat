@@ -315,6 +315,8 @@ func (init *InitService) getContact() error {
 			if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
 				init.BaseUserData.ContactList.Group = append(init.BaseUserData.ContactList.Group, item)
+				// 通讯录的群组需要单独查询组员信息
+				init.BatchGetContactInfo([]string{item.UserName})
 			} else if item.UserName[:1] == "@" { // 联系人
 				temp.Type = types.CONTACT_TYPE_MEMBER
 				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
