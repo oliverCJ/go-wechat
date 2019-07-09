@@ -171,14 +171,8 @@ type MPArticle struct {
 type ContactList struct {
 	// 联系人列表
 	MemberList []Member
-	// 分组
+	// 群聊
 	Group []Member
-	// 公众号
-	PublicUser []Member
-	// 特殊
-	Special []Member
-	// 未知类型
-	Unknown []Member
 }
 
 // 获取消息原始结构

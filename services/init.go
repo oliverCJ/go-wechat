@@ -161,8 +161,6 @@ func (init *InitService) loginInit() error {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
 			} else if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
-			} else if item.VerifyFlag&8 != 0 { // 公总号
-				temp.Type = types.CONTACT_TYPE_PUBLIC
 			} else if item.UserName[:1] == "@" {
 				temp.Type = types.CONTACT_TYPE_MEMBER
 			} else {
@@ -298,30 +296,31 @@ func (init *InitService) getContact() error {
 			if item.UserName[:2] == "@@" { // 群组
 				temp.Type = types.CONTACT_TYPE_GROUP
 				init.BaseUserData.ContactList.Group = append(init.BaseUserData.ContactList.Group, item)
-			} else if item.VerifyFlag&8 != 0 { // 公众号
-				temp.Type = types.CONTACT_TYPE_PUBLIC
-				init.BaseUserData.ContactList.PublicUser = append(init.BaseUserData.ContactList.PublicUser, item)
 			} else if item.UserName[:1] == "@" { // 联系人
 				temp.Type = types.CONTACT_TYPE_MEMBER
 				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
 			} else if _, ok := global.Common.SpecialUsers[item.UserName]; ok {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
-				init.BaseUserData.ContactList.Special = append(init.BaseUserData.ContactList.Special, item)
+				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
 			} else {
 				temp.Type = types.CONTACT_TYPE_UNKONWN
-				init.BaseUserData.ContactList.Unknown = append(init.BaseUserData.ContactList.Unknown, item)
+				init.BaseUserData.ContactList.MemberList = append(init.BaseUserData.ContactList.MemberList, item)
 			}
 
 			init.BaseUserData.GlobalMemberMap[item.UserName] = temp
 		}
 	}
 
+	// 处理chatlist
+	chatListMap := make(map[string]Member)
+	for _, v := range init.BaseUserData.ChatList {
+		chatListMap[v.UserName] = v
+	}
 	// 映射chatset
 	if len(init.BaseUserData.ChatSet) > 0 {
-		init.BaseUserData.ChatList = []Member{}
 		for _, v := range init.BaseUserData.ChatSet {
 			if value, ok := init.BaseUserData.GlobalMemberMap[v]; ok {
-				init.BaseUserData.ChatList = append(init.BaseUserData.ChatList, Member{
+				chatListMap[value.UserName] = Member{
 					UserName:    value.UserName,
 					NickName:    value.NickName,
 					DisplayName: value.DisplayName,
@@ -331,9 +330,15 @@ func (init *InitService) getContact() error {
 					VerifyFlag:  value.VerifyFlag,
 					Province:    value.Province,
 					City:        value.City,
-				})
+				}
 			}
 		}
+	}
+
+	init.BaseUserData.ChatList = []Member{}
+	// 重组chatlist
+	for _, v := range chatListMap {
+		init.BaseUserData.ChatList = append(init.BaseUserData.ChatList, v)
 	}
 	return nil
 }
