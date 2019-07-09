@@ -156,9 +156,17 @@ func (init *InitService) loginInit() error {
 				VerifyFlag:  item.VerifyFlag,
 				Province:    item.Province,
 				City:        item.City,
-				MemberList:  item.MemberList,
 				MemberCount: item.MemberCount,
 			}
+
+			if len(item.MemberList) > 0 {
+				groupMemberMap := make(map[string]User)
+				for _, v := range item.MemberList {
+					groupMemberMap[v.UserName] = v
+				}
+				temp.GroupMemberMap = groupMemberMap
+			}
+
 			if _, ok := global.Common.SpecialUsers[item.UserName]; ok {
 				temp.Type = types.CONTACT_TYPE_SPECIAL
 			} else if item.UserName[:2] == "@@" { // 群组
@@ -282,6 +290,7 @@ func (init *InitService) getContact() error {
 
 	// 处理联系人
 	if respData.MemberCount > 0 {
+
 		for _, item := range respData.MemberList {
 			temp := TinyMemberInfo{
 				UserName:    item.UserName,
@@ -293,8 +302,14 @@ func (init *InitService) getContact() error {
 				VerifyFlag:  item.VerifyFlag,
 				Province:    item.Province,
 				City:        item.City,
-				MemberList:  item.MemberList,
 				MemberCount: item.MemberCount,
+			}
+			if len(item.MemberList) > 0 {
+				groupMemberMap := make(map[string]User)
+				for _, v := range item.MemberList {
+					groupMemberMap[v.UserName] = v
+				}
+				temp.GroupMemberMap = groupMemberMap
 			}
 
 			if item.UserName[:2] == "@@" { // 群组
@@ -399,7 +414,13 @@ func (init *InitService) BatchGetContactInfo(ids []string) error {
 		if value, ok := init.BaseUserData.GlobalMemberMap[v.UserName]; ok {
 			temp := init.BaseUserData.GlobalMemberMap[v.UserName]
 			if v.UserName[:2] == "@@" {
-				temp.MemberList = value.MemberList
+				if len(v.MemberList) > 0 {
+					groupMemberMap := make(map[string]User)
+					for _, v2 := range v.MemberList {
+						groupMemberMap[v2.UserName] = v2
+					}
+					temp.GroupMemberMap = groupMemberMap
+				}
 			}
 			temp.DisplayName = value.DisplayName
 			temp.NickName = value.NickName

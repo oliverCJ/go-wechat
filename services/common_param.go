@@ -40,18 +40,18 @@ type BaseUserData struct {
 
 // 精简联系人信息（主要是为了构建全局MAP，便于查找）
 type TinyMemberInfo struct {
-	UserName    string
-	NickName    string
-	DisplayName string
-	HeadImgUrl  string
-	Sex         int
-	Signature   string
-	VerifyFlag  int
-	Province    string
-	City        string
-	Type        types.ContactType
-	MemberList  []User
-	MemberCount int
+	UserName       string
+	NickName       string
+	DisplayName    string
+	HeadImgUrl     string
+	Sex            int
+	Signature      string
+	VerifyFlag     int
+	Province       string
+	City           string
+	Type           types.ContactType
+	GroupMemberMap map[string]User
+	MemberCount    int
 }
 
 // 公参
