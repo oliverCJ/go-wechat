@@ -10,10 +10,12 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/mdp/qrterminal"
 	"github.com/oliverCJ/go-wechat/constants/errors"
 	"github.com/oliverCJ/go-wechat/global"
 	"github.com/oliverCJ/go-wechat/util"
 	"github.com/sirupsen/logrus"
+	"github.com/tuotoo/qrcode"
 )
 
 // 登录相关
@@ -55,7 +57,7 @@ func (login *LoginService) Login() error {
 		return err
 	}
 	defer os.Remove(login.QrImagePath)
-
+	login.showTermQrCode()
 	err = login.openQrCode()
 	if err != nil {
 		return err
@@ -151,6 +153,19 @@ func (login LoginService) openQrCode() error {
 
 // TODO 命令行展示二维码
 func (login LoginService) showTermQrCode() error {
+	fi, err := os.Open(login.QrImagePath)
+	if err != nil {
+		logrus.Println(err.Error())
+		return err
+	}
+	defer fi.Close()
+	qrmatrix, err := qrcode.Decode(fi)
+	if err != nil {
+		logrus.Println(err.Error())
+		return err
+	}
+	// logrus.Infof("qr code %s", qrmatrix.Content)
+	qrterminal.Generate(qrmatrix.Content, qrterminal.L, os.Stdout)
 	return nil
 }
 
