@@ -14,3 +14,6 @@ go get -u github.com/oliverCJ/go-wechat
 
 # 参考examples实例
 ``` 
+
+### 项目实例
+https://github.com/oliverCJ/wechat-terminal
