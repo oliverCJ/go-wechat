@@ -148,7 +148,7 @@ func (msg *MsgServices) SyncMsg() error {
 	err = json.Unmarshal(resp, respData)
 	if err != nil {
 		logrus.Warningf("消息解析失败[msg:%+s, err:%s]", string(resp), err.Error())
-		return errors.MsgError.New().WithMsg("消息解析失败").WithDesc(fmt.Sprintf("[msg:%+s, err:%s]", string(resp), err.Error()))
+		return errors.MsgError.New().WithMsg("消息解析失败").WithDesc(fmt.Sprintf("[msg:%s, err:%s]", string(resp), err.Error()))
 	}
 
 	if respData.BaseResponse.Ret != 0 {
@@ -357,8 +357,6 @@ func (msg *MsgServices) SyncDaemon(close chan<- bool) {
 			err := msg.SyncMsg()
 			if err != nil {
 				logrus.Warningf("拉取消息发生错误[err:%s]", err.Error())
-				close <- true
-				return
 			}
 			err = msg.ParseMsg()
 			if err != nil {
@@ -368,8 +366,6 @@ func (msg *MsgServices) SyncDaemon(close chan<- bool) {
 			err := msg.SyncMsg()
 			if err != nil {
 				logrus.Warningf("拉取消息发生错误[err:%s]", err.Error())
-				close <- true
-				return
 			}
 			logrus.Infof("通讯录发生变更")
 			// 更新通讯录
@@ -379,13 +375,10 @@ func (msg *MsgServices) SyncDaemon(close chan<- bool) {
 			err := msg.SyncMsg()
 			if err != nil {
 				logrus.Warningf("拉取消息发生错误[err:%s]", err.Error())
-				close <- true
-				return
 			}
 		case 7: // 进入或离开聊天界面
 		case 0: // 无事件
 		}
-		logrus.Debugf("diff time:%v", time.Now().Sub(checkTime).Seconds())
 		if time.Now().Sub(checkTime).Seconds() <= 20 {
 			time.Sleep(time.Second * time.Duration(time.Now().Sub(checkTime).Seconds()))
 		}

@@ -56,12 +56,17 @@ func (login *LoginService) Login() error {
 	if err != nil {
 		return err
 	}
+
 	defer os.Remove(login.QrImagePath)
-	login.showTermQrCode()
-	err = login.openQrCode()
+
+	err = login.showTermQrCode()
 	if err != nil {
 		return err
 	}
+	//err = login.openQrCode()
+	//if err != nil {
+	//	return err
+	//}
 
 	// 尝试登录
 	for ; login.scanRetryTimes > 0; login.scanRetryTimes-- {
@@ -151,26 +156,25 @@ func (login LoginService) openQrCode() error {
 	return exec.Command("open", login.QrImagePath).Start()
 }
 
-// TODO 命令行展示二维码
+// 命令行展示二维码
 func (login LoginService) showTermQrCode() error {
 	fi, err := os.Open(login.QrImagePath)
 	if err != nil {
-		logrus.Println(err.Error())
+		logrus.Warningf("展示二维码失败，打开二维码文件失败[err:%s]", err.Error())
 		return err
 	}
 	defer fi.Close()
-	qrmatrix, err := qrcode.Decode(fi)
+	qrMatrix, err := qrcode.Decode(fi)
 	if err != nil {
-		logrus.Println(err.Error())
+		logrus.Warningf("展示二维码失败，解析二维码文件失败[err:%s]", err.Error())
 		return err
 	}
-	// logrus.Infof("qr code %s", qrmatrix.Content)
-	qrterminal.Generate(qrmatrix.Content, qrterminal.L, os.Stdout)
+	qrterminal.Generate(qrMatrix.Content, qrterminal.H, os.Stdout)
 	return nil
 }
 
 // 等待扫描
-func (login LoginService) waitForScan() (retry bool, err error) {
+func (login *LoginService) waitForScan() (retry bool, err error) {
 	if login.scanRetryTimes == 0 {
 		logrus.Warningf("扫码登录失败,重试次数已达上限，请重新启动程序")
 		return false, errors.LoginError.New().WithMsg("扫码登录失败").WithDesc("重试次数已达上限，请重新启动程序")

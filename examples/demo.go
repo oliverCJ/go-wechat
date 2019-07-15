@@ -34,7 +34,7 @@ func startDaemon() {
 		for {
 			select {
 			case log := <- logOut:
-				fmt.Println("hook:" + log)
+				fmt.Print("hook:" + log)
 			case <-closeChan:
 				logrus.Infof("意外中断")
 				return
